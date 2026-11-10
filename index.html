@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.4 system-ui,-apple-system,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Create-A-Hoss</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=Big+Shoulders+Display:wght@800;900&display=swap">
+<style>
+/* Layout: House of Hoss header bar with ring ropes, the silver nameplate (title card, then the current draw, then the OVR),
+   then the figure with five labels pointing at body parts. Tokens and header/plate styles are Blind Booker's
+   (blindbooker/template.html); keep them in sync. */
+:root{
+  --canvas:#BDC1C6; --panel:#FFFFFF; --ink:#0E0F12; --muted:#40474F; --line:#A3A8AF; --well:#D0D3D7;
+  --bar:#2F353C; --bar-ink:#FFFFFF; --bar-muted:#AEB4BB; --bar-line:#454C55;
+  --rope-r:#5B18EA; --rope-w:#FFFFFF; --rope-b:#0E0F12;
+  --plate-a:#F4F5F7; --plate-b:#C3C7CD; --plate-c:#7D848D; --plate-edge:#3D444C; --plate-ink:#0E0F12;
+  --plate-shine:rgba(255,255,255,.6);
+  --accent:#5B18EA; --on-accent:#FFFFFF; --accent-soft:rgba(91,24,234,.10); --bad:#B3202B; --bad-soft:rgba(200,35,47,.12);
+  --focus:#5B18EA; --shadow:rgba(14,15,18,.18);
+  --spot:#E9EBEE; --wire:#40474F;
+  --f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --f-body:"Barlow","Helvetica Neue",Arial,sans-serif;
+  --f-label:"Barlow Condensed","Arial Narrow",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --canvas:#16181B; --panel:#212429; --ink:#EEEFF1; --muted:#9BA2AA; --line:#33383F; --well:#2A2E34;
+    --bar:#0B0C0E; --bar-ink:#FFFFFF; --bar-muted:#8D949C; --bar-line:#2A2F35;
+    --rope-r:#8F5CFF; --rope-w:#E6E7EA; --rope-b:#5A616A;
+    --plate-a:#DDE0E4; --plate-b:#A6ABB2; --plate-c:#646B74; --plate-edge:#30363D; --plate-ink:#0E0F12;
+    --plate-shine:rgba(255,255,255,.45);
+    --accent:#8F5CFF; --on-accent:#0E0F12; --accent-soft:rgba(143,92,255,.16); --bad:#FF7A84; --bad-soft:rgba(229,85,94,.18);
+    --focus:#A57DFF; --shadow:rgba(0,0,0,.5);
+    --spot:#C9CDD2; --wire:#9BA2AA;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --canvas:#16181B; --panel:#212429; --ink:#EEEFF1; --muted:#9BA2AA; --line:#33383F; --well:#2A2E34;
+  --bar:#0B0C0E; --bar-ink:#FFFFFF; --bar-muted:#8D949C; --bar-line:#2A2F35;
+  --rope-r:#8F5CFF; --rope-w:#E6E7EA; --rope-b:#5A616A;
+  --plate-a:#DDE0E4; --plate-b:#A6ABB2; --plate-c:#646B74; --plate-edge:#30363D; --plate-ink:#0E0F12;
+  --plate-shine:rgba(255,255,255,.45);
+  --accent:#8F5CFF; --on-accent:#0E0F12; --accent-soft:rgba(143,92,255,.16); --bad:#FF7A84; --bad-soft:rgba(229,85,94,.18);
+  --focus:#A57DFF; --shadow:rgba(0,0,0,.5);
+    --spot:#C9CDD2; --wire:#9BA2AA;
+  color-scheme:dark;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--canvas);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2.5px solid var(--focus);outline-offset:2px}
+.wrap{max-width:34rem;margin-inline:auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+
+/* Header bar and ropes (same as Title Run) */
+.bar{background:var(--bar);color:var(--bar-ink)}
+.bar-in{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:16px 14px}
+.brand{display:grid;gap:8px;justify-items:start}
+.home{display:inline-flex;align-items:center;gap:6px;color:var(--bar-muted);text-decoration:none;font-family:var(--f-label);font-weight:700;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase}
+.home img{width:18px;height:18px;display:block}
+.home:hover,.home:focus-visible{color:var(--bar-ink)}
+.mark{font-family:var(--f-display);font-weight:900;font-size:1.75rem;line-height:.85;text-transform:uppercase;letter-spacing:.01em;margin:0}
+.mark span{display:block;font-family:var(--f-label);font-weight:600;font-size:.7rem;letter-spacing:.22em;color:var(--bar-muted);margin-top:6px}
+.modes{display:flex;gap:2px;padding:3px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--bar-line)}
+.modes button{background:none;border:0;border-radius:999px;padding:7px 13px;cursor:pointer;font-family:var(--f-label);font-weight:700;font-size:.8rem;letter-spacing:.12em;text-transform:uppercase;color:var(--bar-muted)}
+.modes button[aria-pressed="true"]{background:var(--bar-ink);color:var(--bar)}
+.ropes{display:grid;gap:4px;padding-block:0 8px;background:var(--bar)}
+.ropes i{display:block;height:4px}
+.ropes i:nth-child(1){background:var(--rope-r)}
+.ropes i:nth-child(2){background:var(--rope-w)}
+.ropes i:nth-child(3){background:var(--rope-b)}
+
+
+/* The draw: silver nameplate showing what you have to place next */
+.plate{overflow:hidden;border-radius:14px;padding:20px 26px 18px;color:var(--plate-ink);
+  background:
+    radial-gradient(circle at 13px 13px, var(--plate-edge) 3px, transparent 3.6px),
+    radial-gradient(circle at calc(100% - 13px) 13px, var(--plate-edge) 3px, transparent 3.6px),
+    radial-gradient(circle at 13px calc(100% - 13px), var(--plate-edge) 3px, transparent 3.6px),
+    radial-gradient(circle at calc(100% - 13px) calc(100% - 13px), var(--plate-edge) 3px, transparent 3.6px),
+    linear-gradient(112deg, var(--plate-b) 0%, var(--plate-a) 26%, var(--plate-b) 50%, var(--plate-a) 72%, var(--plate-c) 100%);
+  box-shadow:inset 0 0 0 2px var(--plate-edge), inset 0 0 0 5px var(--plate-a), inset 0 0 0 6px var(--plate-edge), 0 8px 22px var(--shadow)}
+.plate::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg, transparent 35%, var(--plate-shine) 50%, transparent 65%);transform:translateX(-120%)}
+.plate.glint::after{animation:glint 1s ease-out 1}
+@keyframes glint{to{transform:translateX(120%)}}
+.eyebrow{font-family:var(--f-label);font-weight:700;font-size:.78rem;letter-spacing:.22em;text-transform:uppercase}
+.plate h1{font-family:var(--f-display);font-weight:900;font-size:clamp(2rem, 9vw, 3.1rem);line-height:.92;text-transform:uppercase;text-wrap:balance;overflow-wrap:anywhere;margin:6px 0 8px;text-shadow:0 1px 0 var(--plate-shine)}
+.plate-sub{font-family:var(--f-label);font-weight:700;font-size:.9rem;letter-spacing:.18em;text-transform:uppercase;min-height:1.2em}
+.hint{font-size:.92rem;color:var(--muted);margin:0}
+[hidden]{display:none!important}
+main{display:grid;gap:16px;padding-block:18px 44px}
+.meta{display:flex;justify-content:space-between;gap:12px;font-family:var(--f-label);font-weight:600;font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+/* Title card: the plate is a button until the first draw */
+.plate{position:relative;text-align:center;padding:22px 22px 18px}
+.plate.tap{cursor:pointer}
+.plate.tap:hover,.plate.tap:focus-visible{box-shadow:inset 0 0 0 2px var(--plate-edge), inset 0 0 0 5px var(--plate-a), inset 0 0 0 6px var(--plate-edge), 0 0 0 3px var(--accent), 0 8px 22px var(--shadow);outline:none}
+.plate.title h1{font-size:clamp(2.6rem, 13vw, 4.4rem);margin:2px 0 6px}
+.plate.title .plate-sub{color:var(--accent);animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{50%{opacity:.35}}
+/* Perfect Hoss / 99: purple ring around the plate; the 99 headline is long, so it runs smaller */
+.plate.win{box-shadow:inset 0 0 0 2px var(--plate-edge), inset 0 0 0 5px var(--plate-a), inset 0 0 0 6px var(--plate-edge), 0 0 0 4px var(--accent), 0 8px 26px var(--shadow)}
+.plate .goat{display:block;font-size:.72em;line-height:.95}
+.ovr{display:inline-flex;align-items:baseline;gap:.12em}
+.ovr b{font-size:1.9em;line-height:.8}
+.ovr small{font-family:var(--f-label);font-weight:700;font-size:.42em;letter-spacing:.16em}
+
+/* The figure and its five labels. Label tops are set per slot (left / right columns); the leader lines are an SVG
+   drawn by script.js from each label to its body point. */
+.stage{position:relative;display:grid;grid-template-columns:minmax(0,1fr) clamp(118px, 36%, 228px) minmax(0,1fr);align-items:start}
+.spot{grid-column:2;position:relative}
+.spot::before{content:"";position:absolute;inset:-6% -30%;z-index:0;border-radius:50%;
+  background:radial-gradient(closest-side, var(--spot) 0%, var(--spot) 55%, transparent 100%)}
+.spot img{position:relative;z-index:1;display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
+.wires{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
+.wires path{fill:none;stroke:var(--wire);stroke-width:1.6}
+.wires circle{fill:var(--accent);stroke:var(--panel);stroke-width:1.5}
+.wires .live path{stroke:var(--accent);stroke-width:2}
+/* Labels stack in their column (left: Promo, Look, Ring Work spread top to bottom; right: Popularity, then Finisher),
+   so they never overlap; the column grows past the figure if the names run long. */
+.col{position:relative;z-index:3;align-self:stretch;display:flex;flex-direction:column;gap:12px;min-width:0}
+.col.l{justify-content:space-between}
+.col.r{padding-top:6%;gap:clamp(16px, 9%, 48px)}
+.tag{position:relative;display:grid;gap:3px;text-align:left;padding:8px 10px 9px;border-radius:10px;
+  background:var(--panel);border:1.5px solid var(--line);min-width:0}
+.col.r .tag{text-align:right}
+.col.l .tag{margin-right:6px}
+.col.r .tag{margin-left:6px}
+.tag .k{font-family:var(--f-label);font-weight:700;font-size:clamp(.66rem, 2.6vw, .74rem);letter-spacing:clamp(.06em, .5vw, .18em);text-transform:uppercase;color:var(--muted)}
+.tag .who{font-family:var(--f-display);font-weight:800;font-size:clamp(.95rem, 3.6vw, 1.25rem);line-height:1.02;text-transform:uppercase;overflow-wrap:break-word;min-width:0}
+.tag .who.none{font-family:var(--f-label);font-weight:600;font-size:.86rem;letter-spacing:.12em;color:var(--muted)}
+.tag .move{font-size:.8rem;line-height:1.25;color:var(--muted)}
+/* Finished Hoss: each name highlighted by how good that part is (green / yellow / orange / red). Same fills in light and dark. */
+.hl{padding:0 .16em;border-radius:4px;color:#0E0F12;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.hl.g{background:#5CCB7E}.hl.y{background:#F2D04B}.hl.o{background:#F49A45}.hl.r{background:#EE6464}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+button.tag{cursor:pointer;font:inherit;color:inherit;border:1.5px dashed var(--accent);background:var(--accent-soft)}
+button.tag .k{color:var(--accent)}
+button.tag .who.none{color:var(--accent)}
+button.tag:hover{background:var(--accent);border-style:solid}
+button.tag:hover .k,button.tag:hover .who{color:var(--on-accent)}
+.tag.fresh{animation:slam .45s cubic-bezier(.2,1.5,.4,1) 1}
+@keyframes slam{from{transform:translateY(-8px) scale(1.12);opacity:.2}to{transform:none;opacity:1}}
+.tag.best{border-color:var(--accent);box-shadow:0 0 0 1.5px var(--accent)}
+
+/* Finished Hoss */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:12px}
+.card h2{margin:0;font-family:var(--f-display);font-weight:900;font-size:1.6rem;line-height:1;text-transform:uppercase}
+.share{margin:0;white-space:pre-wrap;font:500 .9rem/1.4 var(--f-body);background:var(--canvas);border:1px solid var(--line);border-radius:8px;padding:12px;overflow-wrap:anywhere}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:0;border-radius:10px;padding:12px 18px;cursor:pointer;font-family:var(--f-label);font-weight:700;font-size:1rem;letter-spacing:.14em;text-transform:uppercase;background:var(--accent);color:var(--on-accent)}
+.btn.alt{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.btn:active{transform:translateY(1px)}
+.status{font-size:.88rem;color:var(--muted);min-height:1.3em;margin:0}
+.perfect{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.perfect h3{margin:0;font-family:var(--f-display);font-weight:900;font-size:1.3rem;line-height:1;text-transform:uppercase}
+.perfect ul{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.perfect li{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:.95rem}
+.perfect li .pw{text-align:right;font-family:var(--f-display);font-weight:800;font-size:1.05rem;line-height:1.15;text-transform:uppercase}
+.perfect li > span:first-child{white-space:nowrap;font-family:var(--f-label);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-size:.82rem}
+.perfect p{margin:0;font-size:.92rem;color:var(--muted)}
+#copyBox{position:absolute;left:-9999px;top:0}
+footer{display:grid;gap:8px;font-size:.8rem;color:var(--muted);padding-block:0 32px;line-height:1.5}
+footer p{margin:0}
+footer a{color:var(--ink)}
+.links{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.84rem}
+.links a{font-weight:600;text-underline-offset:3px}
+@media (prefers-reduced-motion: reduce){ .tag.fresh,.plate.glint::after,.plate.title .plate-sub{animation:none} }
+</style>
+
+<style>
+/* House of Hoss shared styles (built into every page by site/hoss.py, after the page's own CSS so themes win).
+   Color schemes: :root[data-egg="<id>"] token overrides, used for saved schemes and Egg Card themes on every page. */
+:root[data-egg="deadlock"]{
+  --canvas:#F26A1B; --panel:#FFFFFF; --ink:#0B0B0B; --muted:#3B2416; --line:#0B0B0B; --well:#FFE1CC;
+  --bar:#0B0B0B; --bar-ink:#FFFFFF; --bar-muted:#F26A1B; --bar-line:#F26A1B;
+  --rope-r:#F26A1B; --rope-w:#FFFFFF; --rope-b:#F26A1B;
+  --plate-a:#2E2E2E; --plate-b:#0B0B0B; --plate-c:#000000; --plate-edge:#F26A1B; --plate-ink:#F26A1B;
+  --plate-shine:rgba(255,255,255,.16); --plate-pip:rgba(255,255,255,.22); --near-pip:#FFFFFF;
+  --focus:#0B0B0B; --shadow:rgba(0,0,0,.35); --accent:#0B0B0B; --on-accent:#FFFFFF; --toast-hi:#F26A1B; color-scheme:light;
+}
+:root[data-egg="taz"]{
+  --canvas:#F07A1A; --panel:#FF9B4A; --ink:#0B0B0B; --muted:#2E1A0A; --line:#0B0B0B; --well:#FFB676;
+  --bar:#0B0B0B; --bar-ink:#F07A1A; --bar-muted:#F07A1A; --bar-line:#F07A1A;
+  --rope-r:#F07A1A; --rope-w:#0B0B0B; --rope-b:#F07A1A;
+  --plate-a:#2E2E2E; --plate-b:#0B0B0B; --plate-c:#000000; --plate-edge:#F07A1A; --plate-ink:#F07A1A;
+  --plate-shine:rgba(255,140,40,.18); --plate-pip:rgba(255,140,40,.25); --near-pip:#F07A1A;
+  --focus:#0B0B0B; --shadow:rgba(0,0,0,.35); --accent:#0B0B0B; --on-accent:#F07A1A; --toast-hi:#F07A1A; color-scheme:light;
+}
+:root[data-egg="nacho"]{
+  --canvas:#5B8DEF; --panel:#FFFFFF; --ink:#0A1A3F; --muted:#14295C; --line:#0A1A3F; --well:#D6E4FF;
+  --bar:#C8102E; --bar-ink:#FFFFFF; --bar-muted:#FFD3DA; --bar-line:#FFFFFF;
+  --rope-r:#FFFFFF; --rope-w:#1D4FC4; --rope-b:#FFFFFF;
+  --plate-a:#EF3B47; --plate-b:#C8102E; --plate-c:#7E0A18; --plate-edge:#0A1A3F; --plate-ink:#FFFFFF;
+  --plate-shine:rgba(255,255,255,.3); --plate-pip:rgba(255,255,255,.35); --near-pip:#0A1A3F;
+  --focus:#0A1A3F; --shadow:rgba(10,26,63,.35); --accent:#C8102E; --on-accent:#FFFFFF; --toast-hi:#5B8DEF; color-scheme:light;
+}
+:root[data-egg="angle"]{
+  --canvas:#F3F5FA; --panel:#FFFFFF; --ink:#0B1F4D; --muted:#3D4A6B; --line:#C8102E; --well:#E2E7F3;
+  --bar:#0B1F4D; --bar-ink:#FFFFFF; --bar-muted:#AFC0E8; --bar-line:#C8102E;
+  --rope-r:#C8102E; --rope-w:#FFFFFF; --rope-b:#C8102E;
+  --plate-a:#2B4C9C; --plate-b:#0B1F4D; --plate-c:#06112B; --plate-edge:#C8102E; --plate-ink:#FFFFFF;
+  --plate-shine:rgba(255,255,255,.25); --plate-pip:rgba(255,255,255,.3); --near-pip:#FFFFFF;
+  --focus:#C8102E; --shadow:rgba(11,31,77,.25); --accent:#C8102E; --on-accent:#FFFFFF; --toast-hi:#FF6B7D; color-scheme:light;
+}
+:root[data-egg="newday"]{
+  --canvas:#8EC8F2; --panel:#FFFFFF; --ink:#1A1446; --muted:#2E2A63; --line:#1A1446; --well:#FFE0EE;
+  --bar:#E8418B; --bar-ink:#FFFFFF; --bar-muted:#FFD1E6; --bar-line:#FFFFFF;
+  --rope-r:#FFFFFF; --rope-w:#1D6FE0; --rope-b:#FFFFFF;
+  --plate-a:#FF9CCB; --plate-b:#E8418B; --plate-c:#A3175A; --plate-edge:#1A1446; --plate-ink:#FFFFFF;
+  --plate-shine:rgba(255,255,255,.35); --plate-pip:rgba(255,255,255,.4); --near-pip:#1A1446;
+  --focus:#1A1446; --shadow:rgba(26,20,70,.25); --accent:#E8418B; --on-accent:#FFFFFF; --toast-hi:#FF9CCB; color-scheme:light;
+}
+:root[data-egg="dibiase"]{
+  --canvas:#CFE3C4; --panel:#FFFDF2; --ink:#10231A; --muted:#2F4A37; --line:#9C7F1E; --well:#E9E3C4;
+  --bar:#14432A; --bar-ink:#F2D16B; --bar-muted:#C9A227; --bar-line:#C9A227;
+  --rope-r:#D4AF37; --rope-w:#14432A; --rope-b:#D4AF37;
+  --plate-a:#F7E08A; --plate-b:#D4AF37; --plate-c:#8A6B12; --plate-edge:#14432A; --plate-ink:#10231A;
+  --plate-shine:rgba(255,250,220,.55); --plate-pip:rgba(255,250,220,.45); --near-pip:#10231A;
+  --focus:#14432A; --shadow:rgba(16,35,26,.25); --accent:#14432A; --on-accent:#F2D16B; --toast-hi:#F2D16B; color-scheme:light;
+}
+:root[data-egg="lod"]{
+  --canvas:#141414; --panel:#222222; --ink:#F2F2F2; --muted:#B5B5B5; --line:#E31B23; --well:#333333;
+  --bar:#000000; --bar-ink:#E31B23; --bar-muted:#E31B23; --bar-line:#E31B23;
+  --rope-r:#E31B23; --rope-w:#000000; --rope-b:#E31B23;
+  --plate-a:#3A3A3A; --plate-b:#121212; --plate-c:#000000; --plate-edge:#E31B23; --plate-ink:#E31B23;
+  --plate-shine:rgba(255,255,255,.12); --plate-pip:rgba(227,27,35,.5); --near-pip:#FFFFFF;
+  --focus:#E31B23; --shadow:rgba(0,0,0,.6); --accent:#E31B23; --on-accent:#FFFFFF; --toast-hi:#E31B23; color-scheme:dark;
+}
+:root[data-egg="deadlock"] .field input{background:#FFFFFF}
+:root[data-egg="taz"] .field input{background:#FFB676}
+/* Pages that name their accent differently pick the theme's accent up too */
+:root[data-egg]{--gold:var(--accent);--gold-ink:var(--on-accent);--accent-soft:color-mix(in srgb, var(--accent) 22%, var(--panel))}
+
+/* Header buttons that open the sheet (pages that don't already style a .statbtn) */
+.hs-hbtn{background:none;border:0;border-radius:999px;padding:7px 13px;cursor:pointer;box-shadow:inset 0 0 0 1px var(--bar-line, var(--bar-muted));
+  color:var(--bar-ink);font-family:var(--f-label);font-weight:700;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+.hs-hbtn:hover,.hs-hbtn:focus-visible{background:var(--bar-ink);color:var(--bar)}
+.hs-hbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* Toast */
+.hs-toast{position:fixed;left:50%;bottom:max(16px, env(safe-area-inset-bottom, 0px));z-index:80;display:grid;gap:3px;justify-items:center;text-align:center;
+  width:max-content;max-width:calc(100vw - 32px);min-width:min(20rem, calc(100vw - 32px));padding:12px 20px 11px;border-radius:12px;cursor:pointer;
+  background:var(--ink);color:var(--canvas);box-shadow:0 12px 32px var(--shadow, rgba(0,0,0,.3));font-family:var(--f-body);
+  transform:translate(-50%, 160%);opacity:0;visibility:hidden;transition:transform .4s cubic-bezier(.2,.9,.3,1.15),opacity .3s,visibility .4s}
+.hs-toast.show{transform:translate(-50%, 0);opacity:1;visibility:visible}
+.hs-toast span{font-family:var(--f-label);font-weight:700;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--toast-hi, var(--accent, var(--gold)))}
+.hs-toast b{font-family:var(--f-display);font-weight:900;font-size:1.7rem;line-height:1;text-transform:uppercase}
+.hs-toast small{font-size:.8rem;opacity:.8}
+
+/* The sheet: a full-screen page over the site */
+html.hs-open{overflow:hidden}
+.hs-sheet{position:fixed;inset:0;z-index:70;overflow-y:auto;overscroll-behavior:contain;background:var(--canvas);color:var(--ink);font-family:var(--f-body);
+  -webkit-overflow-scrolling:touch;animation:hsIn .18s ease-out}
+@keyframes hsIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.hs-in{max-width:44rem;margin-inline:auto;padding:max(18px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));display:grid;gap:16px}
+.hs-h{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hs-h h2{margin:0;font-family:var(--f-display);font-weight:900;font-size:2.4rem;line-height:1;text-transform:uppercase}
+.hs-x{flex:none;display:grid;place-items:center;width:42px;height:42px;border:0;border-radius:50%;cursor:pointer;background:var(--well);color:var(--ink);font-size:1.7rem;line-height:1}
+.hs-x:hover{background:var(--ink);color:var(--panel)}
+.hs-seg{display:flex;gap:6px;min-width:0}
+.hs-seg button{flex:1 1 auto;min-width:0;line-height:1.1;border:0;border-radius:8px;padding:9px 6px;cursor:pointer;background:var(--well);color:var(--muted);
+  font-family:var(--f-label);font-weight:700;font-size:clamp(.74rem, 3.3vw, .88rem);letter-spacing:.07em;text-transform:uppercase}
+.hs-seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.hs-body{display:grid;gap:22px}
+.hs-sec{display:grid;gap:12px;padding:16px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.hs-sec h3{margin:0;font-family:var(--f-label);font-weight:700;font-size:.85rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.hs-fine{margin:0;font-size:.84rem;line-height:1.4;color:var(--muted)}
+.hs-roster{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,9.5rem),1fr));gap:10px}
+.hs-ach,.hs-skin{display:grid;gap:5px;align-content:start;justify-items:start;padding:12px;border-radius:12px;background:var(--canvas);box-shadow:inset 0 0 0 1px var(--line);min-width:0}
+.hs-ach .no{font-family:var(--f-label);font-weight:700;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.hs-ach .emb{display:grid;place-items:center;width:46px;height:46px;border-radius:50%;margin:2px 0 3px;font-style:normal;font-family:var(--f-display);font-weight:900;font-size:1.3rem;line-height:1;
+  color:var(--plate-ink, #0E0F12);background:linear-gradient(135deg, var(--plate-a, #F4F5F7), var(--plate-b, #C3C7CD) 55%, var(--plate-c, #7D848D));
+  box-shadow:inset 0 0 0 2px var(--plate-edge, #3D444C), inset 0 0 0 4px var(--plate-a, #F4F5F7)}
+.hs-ach b,.hs-skin b{font-family:var(--f-display);font-weight:900;font-size:1.25rem;line-height:.95;text-transform:uppercase;overflow-wrap:anywhere}
+.hs-ach .d,.hs-skin .d{font-size:.84rem;line-height:1.3;color:var(--muted)}
+.hs-ach .st{margin-top:auto;padding-top:4px;font-family:var(--f-label);font-weight:700;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--hit, #1B7F46)}
+.hs-ach.locked,.hs-skin.locked{background:transparent;box-shadow:inset 0 0 0 1.5px var(--line)}
+.hs-ach.locked .emb{background:var(--well);color:var(--muted);box-shadow:none}
+.hs-ach.locked b,.hs-ach.locked .st{color:var(--muted)}
+.hs-skin .sw{display:flex;margin:2px 0 3px}
+.hs-skin .sw i{display:block;width:26px;height:26px;border-radius:50%;box-shadow:0 0 0 1.5px var(--ink)}
+.hs-skin .sw i+i{margin-left:-8px}
+.hs-skin.locked .sw i{background:var(--well)}
+.hs-skin.on{box-shadow:inset 0 0 0 2px var(--ink)}
+.hs-btn{margin-top:auto;width:100%;border:0;border-radius:10px;padding:8px 12px;cursor:pointer;background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink);
+  font-family:var(--f-label);font-weight:700;font-size:.86rem;letter-spacing:.12em;text-transform:uppercase}
+.hs-btn:disabled{opacity:.45;cursor:default}
+.hs-tbl{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.hs-tbl th,.hs-tbl td{padding:7px 4px;text-align:center;border-bottom:1px solid var(--line)}
+.hs-tbl thead th{font-family:var(--f-label);font-weight:700;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.hs-tbl tbody th{text-align:left;font-family:var(--f-label);font-weight:700;font-size:.9rem;letter-spacing:.06em;text-transform:uppercase}
+.hs-tbl td{font-family:var(--f-display);font-weight:900;font-size:1.35rem}
+.hs-tbl tr:last-child th,.hs-tbl tr:last-child td{border-bottom:0}
+.hs-nums{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}
+.hs-nums b{display:block;font-family:var(--f-display);font-weight:900;font-size:1.9rem;line-height:1}
+.hs-nums span{font-family:var(--f-label);font-weight:700;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.hs-dist{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.hs-dist li{display:grid;grid-template-columns:2.2rem 1fr;gap:8px;align-items:center;font-family:var(--f-label);font-weight:700}
+.hs-dist .bar{justify-self:start;min-width:1.6rem;padding:2px 7px;border-radius:4px;background:var(--well);text-align:right;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion: reduce){ .hs-sheet{animation:none} .hs-toast{transition:none} }
+</style>
+<script>try{var s=localStorage.getItem("hoh-skin");s=s!==null?JSON.parse(s):JSON.parse(localStorage.getItem("tr-skin")||'""');if(s)document.documentElement.dataset.egg=s}catch(e){}</script>
+<script>
+/* House of Hoss shared layer. Every game and page lives on houseofhoss.com, so they all share one browser save (localStorage).
+   This file holds every game's achievements, the site-wide Easter eggs and color schemes, the Awards / Stats sheet and the toasts.
+   site/hoss.py builds it into every page. Games call:
+     HOSS.earn(game, id)    an achievement ("tr" Title Run, "rr" Roydle Rumble, "bb" Blind Booker)
+     HOSS.foundEgg(id)      an Easter egg (shared by every game)
+     HOSS.look(theme)       an Egg Card's temporary theme ("" = back to the saved color scheme)
+     HOSS.open(view)        open the sheet: "stats", "ach", "eggs" or "unlocks"
+   Any element with data-hoss="stats|ach|eggs|unlocks" opens the sheet on that view. */
+(function(){
+const CFG = {"game": "cah", "launch": {"tr": "2026-10-26", "rr": "2026-11-03", "bb": "2026-11-03", "cah": "2026-11-10"}};
+const store = {
+  get(k){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; }catch(e){ return null; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+const pad = n => String(n).padStart(2, "0");
+
+/* ---- Achievements, per game. The first entry of each game is its "first win", which also unlocks the default colors. */
+const GAMES = [
+  {id: "tr", name: "Title Run", url: "/titlerun/", ach: [
+    {id: "hoss",   g: "★",  title: "Certified Hoss",  desc: "Get your first Title Run right."},
+    {id: "squash", g: "1",  title: "Squash Match",    desc: "Win a Title Run with your first guess."},
+    {id: "count",  g: "5",  title: "Beat the Count",  desc: "Win a Title Run with your last guess."},
+    {id: "three",  g: "3",  title: "Three Count",     desc: "Win 3 dailies in a row."},
+    {id: "iron",   g: "7",  title: "Iron Man",        desc: "Win 7 dailies in a row."},
+    {id: "mark",   g: "M",  title: "Mark Out",        desc: "Win a Title Run in Mark mode."},
+    {id: "smart",  g: "S",  title: "Smart Mark",      desc: "Win a Title Run in Smart Mark mode."},
+    {id: "chaos",  g: "C",  title: "Agent of Chaos",  desc: "Win a Title Run in Chaos mode."},
+    {id: "vet",    g: "25", title: "Hall of Famer",   desc: "Win 25 Title Runs."}]},
+  {id: "rr", name: "Roydle Rumble", url: "/roydle/", ach: [
+    {id: "first",  g: "★",  title: "Over the Top",        desc: "Win your first Roydle Rumble."},
+    {id: "one",    g: "1",  title: "Instant Elimination", desc: "Win with your first guess."},
+    {id: "eight",  g: "8",  title: "Final Two",           desc: "Win with your last guess."},
+    {id: "women",  g: "W",  title: "Women's Revolution",  desc: "Win a women's Roydle Rumble."},
+    {id: "both",   g: "2",  title: "Double Duty",         desc: "Win the men's and women's dailies on the same day."},
+    {id: "three",  g: "3",  title: "Three-Time Winner",   desc: "Win 3 dailies in a row."},
+    {id: "iron",   g: "7",  title: "Iron Man Run",        desc: "Win 7 dailies in a row."},
+    {id: "vet",    g: "25", title: "Rumble Regular",      desc: "Win 25 Roydle Rumbles."}]},
+  {id: "bb", name: "Blind Booker", url: "/blindbooker/", ach: [
+    {id: "first",  g: "★",  title: "The Card Is Set",        desc: "Book your first full card."},
+    {id: "classic",  g: "3½", title: "Instant Classic",       desc: "Book a card rated ★★★½ or better."},
+    {id: "tape",     g: "4★", title: "Tape-Trading Material", desc: "Book a card rated ★★★★ or better."},
+    {id: "disaster", g: "1★", title: "Buyrate Disaster",      desc: "Book a card rated ★¼ or worse."},
+    {id: "jobber", g: "J",  title: "Fans Want Refunds",      desc: "Put a jobber in your main event."},
+    {id: "dream",  g: "VS", title: "Dream Match",            desc: "Book an all-time rivalry."},
+    {id: "six",    g: "6",  title: "Meltzer Broke the Scale", desc: "Book a six-star match."},
+    {id: "week",   g: "7",  title: "Booker of the Week",     desc: "Book 7 daily cards in a row."}]},
+  {id: "cah", name: "Create-A-Hoss", url: "/createahoss/", ach: [
+    {id: "first",   g: "★",  title: "It's Alive",                desc: "Finish your first Hoss."},
+    {id: "perfect", g: "✓",  title: "Perfect Hoss",              desc: "Build the best Hoss your five could make."},
+    {id: "great",   g: "90", title: "Great Hoss",                desc: "Build a Hoss with a 90 OVR or better."},
+    {id: "goat",    g: "99", title: "Greatest Hoss of All Time", desc: "Build a 99 OVR Hoss."},
+    {id: "noweak",  g: "+",  title: "No Weak Links",             desc: "Build a Hoss with no orange or red parts."},
+    {id: "awful",   g: "60", title: "Legit Awful",               desc: "Build a Hoss that's legit awful."},
+    {id: "three",   g: "3",  title: "Hoss Factory",              desc: "Build 3 daily Hosses in a row."},
+    {id: "iron",    g: "7",  title: "Iron Hoss",                 desc: "Build 7 daily Hosses in a row."},
+    {id: "vet",     g: "25", title: "Mad Scientist",             desc: "Build 25 Hosses."}]},
+];
+const GAME = Object.fromEntries(GAMES.map(g => [g.id, g]));
+
+/* ---- Easter eggs, shared by every game. The title is the only hint. */
+const EGGS = [
+  {id: "deadlock", title: "The Long Way"},
+  {id: "taz",      title: "Color Scheme Jones"},
+  {id: "brodie",   title: "You Know What That Means"},
+  {id: "austin",   title: "What?"},
+  {id: "steiner",  title: "Holla If You Hear Me!"},
+  {id: "nacho",    title: "I Wanna Win!"},
+  {id: "angle",    title: "Broken Freaking Neck"},
+  {id: "hendry",   title: "Say His Name"},
+  {id: "knight",   title: "Yeah!"},
+  {id: "kennedy",  title: "Kennedy... Kennedy"},
+  {id: "jr",       title: "Bah Gawd"},
+  {id: "newday",   title: "Don't You Dare Be Sour"},
+  {id: "dibiase",  title: "Money Money Money"},
+  {id: "lod",      title: "What a Rush"},
+  {id: "lightsout",title: "Lights Out"},
+  {id: "suplex",   title: "Welcome to Suplex City"},
+  {id: "619",      title: "Booyaka Booyaka"},
+  {id: "cantsee",  title: "You Can't See Me"},
+  {id: "giant",    title: "Eighth Wonder of the World"},
+  {id: "tiny",     title: "Luck of the Irish"},
+  {id: "pose",     title: "Five-Second Pose"},
+  {id: "fiend",    title: "Let Me In"},
+  {id: "pyro",     title: "Big Red Machine"},
+];
+
+/* ---- Color schemes. "by" = the Easter egg that unlocks it; "first" = a first win in any game. The scheme is the
+   :root[data-egg="<id>"] theme in hoss.css; the default has no theme. */
+const SKINS = [
+  {id: "",         name: "Default",            by: "first",    note: "The original look.",                       sw: ["#BDC1C6", "#2F353C", "#5B18EA"]},
+  {id: "taz",      name: "Taz",                by: "taz",      note: "Orange and black.",                        sw: ["#F07A1A", "#0B0B0B", "#FF9B4A"]},
+  {id: "deadlock", name: "Deadlock",           by: "deadlock", note: "Orange, black and white. No stretching.",  sw: ["#F26A1B", "#0B0B0B", "#FFFFFF"]},
+  {id: "nacho",    name: "Nacho Libre",        by: "nacho",    note: "Blue and red.",                            sw: ["#5B8DEF", "#C8102E", "#FFFFFF"]},
+  {id: "angle",    name: "Kurt Angle",         by: "angle",    note: "Red, white and blue.",                     sw: ["#F3F5FA", "#0B1F4D", "#C8102E"]},
+  {id: "newday",   name: "The New Day",        by: "newday",   note: "Blue, pink and white.",                    sw: ["#8EC8F2", "#E8418B", "#FFFFFF"]},
+  {id: "dibiase",  name: "Million Dollar Man", by: "dibiase",  note: "Green and gold.",                          sw: ["#CFE3C4", "#14432A", "#D4AF37"]},
+  {id: "lod",      name: "Road Warriors",      by: "lod",      note: "Black and red.",                           sw: ["#141414", "#000000", "#E31B23"]},
+];
+
+const ACH_KEY = g => g + "-ach", EGG_KEY = "tr-eggs", SKIN_KEY = "hoh-skin";
+const achFound = g => store.get(ACH_KEY(g)) || {};
+const eggsFound = () => store.get(EGG_KEY) || {};
+const firstWin = () => GAMES.some(g => achFound(g.id)[g.ach[0].id]);
+const skinOpen = s => s.by === "first" ? firstWin() : !!eggsFound()[s.by];
+
+/* ---- Look: the saved color scheme, unless an Egg Card's theme is showing */
+let skin = "", temp = "";
+function savedSkin(){
+  let s = store.get(SKIN_KEY);
+  if(s === null){ s = store.get("tr-skin") || ""; store.set(SKIN_KEY, s); }          // Title Run used to keep its own
+  const k = SKINS.find(x => x.id === s);
+  return k && k.id && skinOpen(k) ? k.id : "";
+}
+function look(t){
+  if(t !== undefined) temp = t || "";
+  const v = temp || skin, r = document.documentElement;
+  if(v) r.dataset.egg = v; else delete r.dataset.egg;
+}
+function setSkin(id){
+  const s = SKINS.find(x => x.id === id); if(!s || !skinOpen(s)) return;
+  skin = id; store.set(SKIN_KEY, id); temp = ""; look();
+  document.dispatchEvent(new CustomEvent("hoss:skin", {detail: id}));                  // games drop any Egg Card that was up
+  render();
+}
+
+/* ---- Toasts (they queue; tapping one opens the sheet) */
+let toastEl = null, toastTimer = 0, toastQ = [], toastBusy = false, toastView = "ach";
+function toast(kicker, title, line, view){ toastQ.push({kicker, title, line, view}); if(!toastBusy) nextToast(); }
+function nextToast(){
+  if(!toastEl){
+    toastEl = document.createElement("div"); toastEl.className = "hs-toast"; toastEl.setAttribute("role", "status");
+    document.documentElement.appendChild(toastEl);                                       // outside <body>: page effects can't move it
+    toastEl.addEventListener("click", () => { clearTimeout(toastTimer); toastQ = []; toastBusy = false; toastEl.classList.remove("show"); open(toastView); });
+  }
+  const t = toastQ.shift();
+  if(!t){ toastBusy = false; toastEl.classList.remove("show"); return; }
+  toastBusy = true; toastView = t.view || "ach";
+  toastEl.innerHTML = `<span>${esc(t.kicker)}</span><b>${esc(t.title)}</b><small>${esc(t.line)}</small>`;
+  toastEl.classList.remove("show"); void toastEl.offsetWidth; toastEl.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(nextToast, 4500);
+}
+
+function earn(g, id){
+  const game = GAME[g]; if(!game) return;
+  const f = achFound(g); if(f[id]) return;
+  const a = game.ach.find(x => x.id === id); if(!a) return;
+  const unlocksDefault = id === game.ach[0].id && !firstWin() && skin;                  // a first win is the way back to the default colors
+  f[id] = Date.now(); store.set(ACH_KEY(g), f);
+  const n = game.ach.filter(x => f[x.id]).length;
+  toast("Achievement unlocked", a.title, unlocksDefault ? "Default colors unlocked. Tap to see them." : `${n} of ${game.ach.length} ${game.name} achievements. Tap to see them.`, unlocksDefault ? "unlocks" : "ach");
+  render();
+}
+function foundEgg(id){
+  const f = eggsFound(); if(!id || f[id]) return;
+  const a = EGGS.find(x => x.id === id); if(!a) return;
+  f[id] = Date.now(); store.set(EGG_KEY, f);
+  const n = EGGS.filter(x => f[x.id]).length, opens = SKINS.some(s => s.by === id);
+  toast("Easter egg found", a.title, opens ? "New color scheme unlocked. Tap to see it." : `${n} of ${EGGS.length} found. Tap to see the rest.`, opens ? "unlocks" : "eggs");
+  render();
+}
+
+/* ---- Stats (read straight from each game's save) */
+const dayNo = launch => { if(!launch) return 0; const d = new Date(), [y, m, dd] = launch.split("-").map(Number);
+  return Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(y, m - 1, dd)) / 864e5) + 1; };
+const liveStreak = (st, n) => st.lastWin >= n - 1 ? st.streak : 0;
+function modeRows(prefix, modes, launch){
+  const n = dayNo(launch);
+  return `<table class="hs-tbl"><thead><tr><th></th><th>Played</th><th>Win %</th><th>Streak</th><th>Best</th></tr></thead><tbody>`
+    + modes.map(([k, label]) => { const st = Object.assign({played: 0, wins: 0, streak: 0, best: 0, lastWin: 0}, store.get(`${prefix}-stats-${k}`) || {});
+        return `<tr><th>${esc(label)}</th><td>${st.played}</td><td>${st.played ? Math.round(st.wins / st.played * 100) : 0}</td><td>${liveStreak(st, n)}</td><td>${st.best}</td></tr>`; }).join("")
+    + `</tbody></table>`;
+}
+const BB_STARS = [5, 4, 3, 2, 1];                          // card ratings by whole stars (3 = ★★★ to ★★★¾)
+function bbStats(){
+  const st = Object.assign({played: 0, cards: 0, streak: 0, best: 0, lastDone: 0, topStars: 0, stars: {}}, store.get("bb-stats") || {});
+  const n = dayNo(CFG.launch.bb), streak = st.lastDone >= n - 1 ? st.streak : 0, max = Math.max(1, ...BB_STARS.map(k => st.stars[k] || 0));
+  return `<div class="hs-nums"><div><b>${st.topStars ? st.topStars.toFixed(2) : "-"}</b><span>Best rating</span></div><div><b>${st.played}</b><span>Daily cards</span></div>`
+    + `<div><b>${streak}</b><span>Streak</span></div><div><b>${st.best}</b><span>Best streak</span></div></div>`
+    + `<ol class="hs-dist" aria-label="Card ratings">` + BB_STARS.map(k => { const v = st.stars[k] || 0;
+        return `<li><span>${k}★</span><span class="bar" style="width:${Math.max(9, v / max * 100)}%">${v}</span></li>`; }).join("") + `</ol>`
+    + `<p class="hs-fine">${st.cards} card${st.cards === 1 ? "" : "s"} booked in all, free play included. Best rating and the chart count every finished card.</p>`;
+}
+const CAH_BANDS = [[99, "99"], [90, "90+"], [80, "80+"], [76, "76+"], [70, "70+"], [0, "Under 70"]];
+function cahStats(){
+  const st = Object.assign({played: 0, hosses: 0, streak: 0, best: 0, lastDone: 0, top: 0, ovr: {}}, store.get("cah-stats") || {});
+  const n = dayNo(CFG.launch.cah), streak = st.lastDone >= n - 1 ? st.streak : 0, bands = CAH_BANDS.map(() => 0);
+  Object.entries(st.ovr).forEach(([o, c]) => { bands[CAH_BANDS.findIndex(([min]) => +o >= min)] += c; });
+  const max = Math.max(1, ...bands);
+  return `<div class="hs-nums"><div><b>${st.top || "-"}</b><span>Top OVR</span></div><div><b>${st.played}</b><span>Daily Hosses</span></div>`
+    + `<div><b>${streak}</b><span>Streak</span></div><div><b>${st.best}</b><span>Best streak</span></div></div>`
+    + `<ol class="hs-dist" aria-label="OVR">` + CAH_BANDS.map(([, label], i) =>
+        `<li><span>${label}</span><span class="bar" style="width:${Math.max(9, bands[i] / max * 100)}%">${bands[i]}</span></li>`).join("") + `</ol>`
+    + `<p class="hs-fine">${st.hosses} Hoss${st.hosses === 1 ? "" : "es"} built in all, free play included. Top OVR and the chart count every finished Hoss.</p>`;
+}
+function statsHTML(only){
+  const parts = {
+    tr: () => `<h3>Title Run</h3>` + modeRows("tr", [["base", "Base"], ["mark", "Mark"], ["smart", "Smart Mark"], ["chaos", "Chaos"]], CFG.launch.tr),
+    rr: () => `<h3>Roydle Rumble</h3>` + modeRows("rr", [["m", "Men's"], ["w", "Women's"]], CFG.launch.rr),
+    bb: () => `<h3>Blind Booker</h3>` + bbStats(),
+    cah: () => `<h3>Create-A-Hoss</h3>` + cahStats(),
+  };
+  const ids = only ? [only] : ["tr", "rr", "bb", "cah"];
+  return ids.map(id => `<section class="hs-sec">${parts[id]()}</section>`).join("")
+    + `<p class="hs-fine">Daily games only, except where noted. Everything is saved in this browser, so a new device starts fresh.</p>`;
+}
+
+/* ---- Awards */
+const shortDate = ts => new Date(ts).toLocaleDateString("en-US", {month: "short", day: "numeric"});
+const card = (a, i, ts, egg) => `<li class="hs-ach ${ts ? "got" : "locked"}"><span class="no">No. ${pad(i + 1)}</span><i class="emb" aria-hidden="true">${ts ? (egg ? "!" : esc(a.g)) : "?"}</i>`
+  + `<b>${esc(a.title)}</b>${egg ? "" : `<span class="d">${esc(a.desc)}</span>`}<span class="st">${ts ? "Earned " + shortDate(ts) : egg ? "Not found yet" : "Locked"}</span></li>`;
+function achHTML(){
+  const order = CFG.game ? [GAME[CFG.game], ...GAMES.filter(g => g.id !== CFG.game)] : GAMES;
+  return order.map(g => { const f = achFound(g.id), n = g.ach.filter(a => f[a.id]).length;
+    return `<section class="hs-sec"><h3>${esc(g.name)} · ${n} of ${g.ach.length}</h3><ul class="hs-roster">${g.ach.map((a, i) => card(a, i, f[a.id], false)).join("")}</ul></section>`; }).join("");
+}
+function eggsHTML(){
+  const f = eggsFound(), n = EGGS.filter(a => f[a.id]).length;
+  return `<section class="hs-sec"><h3>${n} of ${EGGS.length} found</h3><ul class="hs-roster">${EGGS.map((a, i) => card(a, i, f[a.id], true)).join("")}</ul>`
+    + `<p class="hs-fine">Hidden all over the games. Each title is your only hint.</p></section>`;
+}
+function unlocksHTML(){
+  const hidden = SKINS.some(s => s.by !== "first" && !skinOpen(s));
+  const tile = s => { const openNow = skinOpen(s), on = skin === s.id;
+    return `<li class="hs-skin${on ? " on" : ""}${openNow || on ? "" : " locked"}"><span class="sw" aria-hidden="true">${s.sw.map(c => `<i style="background:${c}"></i>`).join("")}</span>`
+      + `<b>${esc(s.name)}</b><span class="d">${openNow || on ? esc(s.note) : "Win any game to unlock."}</span>`
+      + `<button type="button" class="hs-btn" data-skin="${esc(s.id)}"${openNow && !on ? "" : " disabled"}>${on ? "In use" : openNow ? "Use" : "Locked"}</button></li>`; };
+  const mystery = hidden ? `<li class="hs-skin locked"><span class="sw" aria-hidden="true"><i></i><i></i><i></i></span><b>???</b><span class="d">More color schemes are out there.</span></li>` : "";
+  return `<section class="hs-sec"><h3>Color schemes</h3><ul class="hs-roster">${SKINS.filter(s => s.by === "first" || skinOpen(s)).map(tile).join("")}${mystery}</ul>`
+    + `<p class="hs-fine">Your pick follows you to every game on the site, on this device. Once you pick something else, getting back to Default takes a first win in any game.</p></section>`;
+}
+
+/* ---- The sheet: a full-screen page over the site. X, Esc or the back button closes it. */
+const STATS_HERE = !CFG.game || CFG.game === "bb" || CFG.game === "cah";        // homepage: every game's stats. Blind Booker: its own. The others have their own Stats pages.
+let sheet = null, view = "ach";
+function tabs(){ return [...(STATS_HERE ? [["stats", "Stats"]] : []), ["ach", "Achievements"], ["eggs", "Easter Eggs"], ["unlocks", "Unlocks"]]; }
+function render(){
+  if(!sheet) return;
+  if(!tabs().some(([v]) => v === view)) view = "ach";
+  const title = view === "stats" ? "Stats" : "Awards";
+  sheet.querySelector("h2").textContent = title;
+  sheet.setAttribute("aria-label", title);
+  sheet.querySelector(".hs-seg").innerHTML = tabs().map(([v, l]) => `<button type="button" data-view="${v}" aria-pressed="${view === v}">${l}</button>`).join("");
+  sheet.querySelector(".hs-body").innerHTML = view === "stats" ? statsHTML(CFG.game || "") : view === "eggs" ? eggsHTML() : view === "unlocks" ? unlocksHTML() : achHTML();
+}
+function open(v){
+  view = v || "ach";
+  if(!sheet){
+    sheet = document.createElement("div"); sheet.className = "hs-sheet"; sheet.setAttribute("role", "dialog"); sheet.setAttribute("aria-modal", "true");
+    sheet.innerHTML = `<div class="hs-in"><div class="hs-h"><h2></h2><button type="button" class="hs-x" aria-label="Close">&times;</button></div>`
+      + `<div class="hs-seg" role="group" aria-label="View"></div><div class="hs-body"></div></div>`;
+    sheet.addEventListener("click", e => {
+      const v2 = e.target.closest("button[data-view]"), k = e.target.closest("button[data-skin]");
+      if(e.target.closest(".hs-x")) close();
+      else if(v2){ view = v2.dataset.view; render(); sheet.scrollTop = 0; }
+      else if(k && !k.disabled) setSkin(k.dataset.skin);
+    });
+    document.documentElement.appendChild(sheet);
+    try{ history.pushState({hoss: 1}, ""); }catch(e){}
+  }
+  document.documentElement.classList.add("hs-open");
+  render(); sheet.scrollTop = 0;
+  const x = sheet.querySelector(".hs-x"); if(x) x.focus({preventScroll: true});
+}
+function close(fromHistory){
+  if(!sheet) return;
+  sheet.remove(); sheet = null; document.documentElement.classList.remove("hs-open");
+  if(!fromHistory){ try{ if(history.state && history.state.hoss) history.back(); }catch(e){} }
+}
+addEventListener("popstate", () => { if(sheet) close(true); });
+addEventListener("keydown", e => { if(e.key === "Escape" && sheet) close(); });
+document.addEventListener("click", e => { const b = e.target.closest("[data-hoss]"); if(b){ e.preventDefault(); open(b.dataset.hoss); } });
+
+skin = savedSkin(); look();
+window.HOSS = {earn, foundEgg, look, open, close, achFound, eggsFound, setSkin, GAMES, EGGS, SKINS, store,
+  get skin(){ return skin; }};
+})();
+</script>
+</head>
+<body>
+<header class="bar">
+  <div class="wrap bar-in">
+    <div class="brand">
+      <a class="home" href="/"><img src="/icon-192.png" alt="">House of Hoss</a>
+      <p class="mark">Create-A-Hoss<span>Build a wrestler blind</span></p>
+    </div>
+    <div class="modes" role="group" aria-label="Game mode">
+      <button type="button" id="modeDaily" aria-pressed="true">Daily</button>
+      <button type="button" id="modeFree" aria-pressed="false">Free play</button>
+    </div>
+    <div class="hs-hbtns">
+      <button type="button" class="hs-hbtn" data-hoss="stats">Stats</button>
+      <button type="button" class="hs-hbtn" data-hoss="ach">Awards</button>
+    </div>
+  </div>
+  <div class="ropes" aria-hidden="true"><i></i><i></i><i></i></div>
+</header>
+
+<main class="wrap">
+  <div class="meta"><span id="metaL">Daily</span><span id="metaR"></span></div>
+
+  <section class="plate" id="plate" aria-live="polite">
+    <div class="eyebrow" id="drawEyebrow"></div>
+    <h1 id="drawName">Create-A-Hoss</h1>
+    <div class="plate-sub" id="drawSub">Click to begin</div>
+  </section>
+  <p class="hint" id="hint"></p>
+
+  <section class="stage" id="stage" aria-label="Your Hoss">
+    <div class="col l" id="colL"></div>
+    <div class="spot"><img id="fig" src="data:image/png;base64,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" alt="A masked wrestler" width="462" height="912"></div>
+    <div class="col r" id="colR"></div>
+    <svg class="wires" id="wires" aria-hidden="true"></svg>
+  </section>
+
+  <section class="card" id="done" hidden>
+    <h2 id="doneTitle">Your Hoss</h2>
+    <pre class="share" id="share"></pre>
+    <div class="btns">
+      <button type="button" class="btn" id="copyShort">Copy OVR</button>
+      <button type="button" class="btn alt" id="copyFull">Copy full Hoss</button>
+      <button type="button" class="btn alt" id="againBtn">Build another</button>
+    </div>
+    <p class="status" id="status" aria-live="polite"></p>
+    <div class="btns"><button type="button" class="btn alt" id="perfectBtn">Reveal perfect Hoss</button></div>
+    <div class="perfect" id="perfect" hidden></div>
+  </section>
+</main>
+<footer class="wrap">
+  <nav class="links" aria-label="More">
+    <a href="about.html">How to play</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/">More from House of Hoss</a>
+  </nav>
+  <p id="foot"></p>
+</footer>
+<textarea id="copyBox" aria-hidden="true" tabindex="-1"></textarea>
+
+<script>
+// Create-A-Hoss. Data (names, five ratings each, finisher moves, launch date) is inlined by createahoss/build.py.
+// Five wrestlers come out one at a time. Each one goes into one of five slots (Popularity, Promo, Ring Work, Look,
+// Finisher) by clicking its label. No take-backs. The finished Hoss gets an OVR from the five ratings in its slots.
+const D = {"launch":"2026-11-10","site":"https://houseofhoss.com/createahoss","names":["Adam Cole","AJ Styles","Alberto Del Rio","André the Giant","Bam Bam Bigelow","Batista","Big E","Big Show","Bobby Lashley","Booker T","Braun Strowman","Bray Wyatt","Bret Hart","Brock Lesnar","Bryan Danielson","Chris Benoit","Chris Jericho","Christian Cage","CM Punk","Cody Rhodes","Damian Priest","Darby Allin","Diamond Dallas Page","Dolph Ziggler","Drew McIntyre","Dustin Rhodes","Dusty Rhodes","Eddie Guerrero","Edge","Finn Bálor","Goldberg","Gunther","\"Hangman\" Adam Page","Hulk Hogan","Jake Roberts","Jeff Hardy","Jeff Jarrett","Jey Uso","Jimmy Snuka","Jinder Mahal","John \"Bradshaw\" Layfield","John Cena","Jon Moxley","Kane","Kazuchika Okada","Keith Lee","Kenny Omega","Kevin Nash","Kevin Owens","King Kong Bundy","Kofi Kingston","Kurt Angle","LA Knight","Lex Luger","Mark Henry","Matt Hardy","Matt Jackson","Mick Foley","MJF","Mr. Perfect","Nick Jackson","Oba Femi","Orange Cassidy","Owen Hart","Pac","Penta","Randy Orton","Randy Savage","Razor Ramon","Rey Mysterio","Ric Flair","Rick Rude","Ricky Steamboat","Rob Van Dam","Roddy Piper","Roman Reigns","Ron Simmons","Sami Zayn","Samoa Joe","Scott Steiner","Seth Rollins","Sgt. Slaughter","Shane McMahon","Shawn Michaels","Sheamus","Shinsuke Nakamura","Solo Sikoa","Sting","\"Stone Cold\" Steve Austin","Swerve Strickland","Sycho Sid","Taz","Ted DiBiase","Terry Funk","The British Bulldog","The Great Khali","The Iron Sheik","The Miz","The Rock","The Undertaker","Triple H","Ultimate Warrior","Umaga","Vader","Vince McMahon","Will Ospreay","Yokozuna"],"r":[[3,4,4,2,3],[4,3,5,3,5],[3,3,3,3,3],[5,1,2,5,3],[3,3,4,5,3],[4,4,3,5,5],[4,4,3,4,3],[3,3,3,5,3],[3,2,3,5,3],[4,4,4,4,3],[3,2,2,5,3],[4,5,3,3,3],[5,3,5,3,5],[5,3,4,5,5],[4,3,5,2,4],[3,1,5,3,4],[4,4,4,3,4],[3,4,4,3,3],[5,5,4,3,4],[4,4,4,3,3],[3,3,3,4,3],[4,2,4,2,3],[4,3,3,3,5],[3,3,4,3,2],[3,3,4,5,4],[3,3,3,3,2],[4,5,2,2,3],[4,4,5,3,4],[4,4,4,3,4],[4,2,5,4,4],[5,2,1,5,5],[3,3,5,4,3],[4,4,5,4,4],[5,5,2,5,4],[4,5,3,3,4],[4,2,4,4,5],[3,4,3,3,3],[3,3,3,3,3],[4,1,3,4,5],[2,2,2,5,2],[3,4,3,4,4],[5,4,3,5,4],[4,4,4,3,3],[4,3,3,5,4],[3,2,5,4,5],[3,3,4,4,3],[4,3,5,4,5],[4,4,2,5,4],[4,4,4,1,4],[3,2,2,4,2],[4,3,4,3,3],[4,4,5,3,5],[4,4,3,4,3],[4,2,3,5,3],[3,3,2,5,3],[3,4,3,2,3],[4,3,5,2,3],[4,5,3,1,4],[4,5,4,4,3],[3,4,5,4,3],[4,3,5,2,3],[3,2,3,5,3],[4,2,4,2,2],[3,4,5,3,4],[3,3,5,4,5],[4,2,4,5,3],[4,4,4,5,5],[5,5,5,5,4],[4,4,3,5,4],[5,2,4,3,5],[5,5,5,4,4],[3,4,4,5,3],[4,2,5,3,2],[4,2,4,3,4],[4,5,3,3,2],[4,3,3,5,4],[3,3,3,4,2],[4,4,4,1,3],[3,4,5,3,4],[3,4,2,5,3],[4,3,5,4,4],[3,3,2,3,3],[3,3,2,2,3],[5,4,5,4,5],[3,3,4,4,3],[3,2,4,3,3],[2,1,2,3,3],[5,3,4,5,4],[5,5,4,4,5],[3,4,4,4,3],[3,1,2,5,3],[3,4,4,2,4],[4,5,3,3,3],[3,4,3,2,2],[3,2,4,5,3],[2,1,1,5,2],[4,3,3,4,3],[3,4,2,3,2],[5,5,4,5,4],[5,3,5,5,5],[4,4,4,5,4],[5,2,1,5,3],[3,1,3,4,2],[3,3,4,4,4],[4,5,1,3,1],[3,3,5,3,4],[3,1,3,4,4]],"move":["Panama Sunrise","Styles Clash","Cross Armbreaker","Sitdown Splash","Greetings from Asbury Park","Batista Bomb","Big Ending","Chokeslam","Spear","Book End","Running Powerslam","Sister Abigail","Sharpshooter","F-5","Busaiku Knee","Crippler Crossface","Walls of Jericho","Killswitch","GTS","Cross Rhodes","South of Heaven","Coffin Drop","Diamond Cutter","Zig Zag","Claymore","Final Cut","Bionic Elbow","Frog Splash","Spear","Coup de Grâce","Spear","Sleeper","Buckshot Lariat","Leg Drop","DDT","Swanton Bomb","Stroke","Uso Splash","Superfly Splash","Khallas","Clothesline from Hell","Attitude Adjustment","Paradigm Shift","Chokeslam","Rainmaker","Spirit Bomb","One-Winged Angel","Jackknife Powerbomb","Pop-up Powerbomb","Avalanche Splash","Trouble in Paradise","Ankle Lock","BFT","Torture Rack","World's Strongest Slam","Twist of Fate","BTE Trigger","Mandible Claw","Salt of the Earth","Perfect-Plex","BTE Trigger","Fall from Grace","Orange Punch","Sharpshooter","Black Arrow","Package Piledriver","RKO","Flying Elbow Drop","Razor's Edge","619","Figure Four","Rude Awakening","Flying Crossbody","Five Star Frog Splash","Sleeper","Superman Punch","Spinebuster","Helluva Kick","Coquina Clutch","Steiner Recliner","Curb Stomp","Cobra Clutch","Coast to Coast","Sweet Chin Music","Brogue Kick","Kinshasa","Samoan Spike","Scorpion Deathlock","Stone Cold Stunner","House Call","Powerbomb","Tazmission","Million Dollar Dream","Spinning Toe Hold","Running Powerslam","Vise Grip","Camel Clutch","Skull-Crushing Finale","Rock Bottom / People's Elbow","Tombstone Piledriver","Pedigree","Gorilla Press Splash","Samoan Spike","Vader Bomb","Stunner","Hidden Blade","Banzai Drop"]};
+const NAMES = D.names, RAT = D.r, MOVE = D.move;     // RAT[i] = [pop, promo, ring, look, fin], 1 to 5
+const SAVE_V = 1;                                     // bump when the slots or the draw change, so old saves are dropped
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const store = {
+  get(k){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+
+/* The five slots, in label order. i = the rating's index in RAT. side = which column the label sits in.
+   at = the body point the label's line ends on, as a fraction of the figure image (x, y). */
+const SLOTS = [
+  {id: "promo", i: 1, name: "Promo",      side: "l", at: [0.365, 0.11]},  // beside the head, off the mask, at mouth height
+  {id: "look",  i: 3, name: "Look",       side: "l", at: [0.335, 0.30]},  // side of the torso
+  {id: "ring",  i: 2, name: "Ring Work",  side: "l", at: [0.27, 0.885]},  // boot
+  {id: "pop",   i: 0, name: "Popularity", side: "r",  at: [0.78, 0.185]},  // shoulder
+  {id: "fin",   i: 4, name: "Finisher",   side: "r", at: [0.92, 0.33]},   // hand
+];
+const SLOT = Object.fromEntries(SLOTS.map(s => [s.id, s]));
+const ORDER = ["pop", "promo", "ring", "look", "fin"];   // order used in the share text and the perfect Hoss list
+
+/* OVR from the five ratings added up (5 to 25). Pete's bands: 99 perfect, 90-98 great, 80-89 good, 76-79 decent,
+   70-75 bad, 60 legit awful. Every number here is a knob. */
+const OVR = {25: 99, 24: 98, 23: 96, 22: 93, 21: 90, 20: 88, 19: 86, 18: 84, 17: 80, 16: 78, 15: 76, 14: 75, 13: 73, 12: 71, 11: 70};
+const ovrOf = total => OVR[total] ?? 60;
+const VERDICT = [[99, "The Greatest Hoss of All Time"], [90, "Great Hoss"], [80, "Good Hoss"], [76, "Decent Hoss"], [70, "Bad Hoss"], [0, "Legit awful"]];
+const verdictOf = o => VERDICT.find(([c]) => o >= c)[1];
+
+/* Seeded draws: the same seed always draws the same five wrestlers in the same order.
+   Daily seed = the local date, so everyone gets the same five that day. */
+function xmur3(str){ let h = 1779033703 ^ str.length;
+  for(let i = 0; i < str.length; i++){ h = Math.imul(h ^ str.charCodeAt(i), 3432918353); h = h << 13 | h >>> 19; }
+  return () => { h = Math.imul(h ^ h >>> 16, 2246822507); h = Math.imul(h ^ h >>> 13, 3266489909); return (h ^= h >>> 16) >>> 0; }; }
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function draw(seed){
+  const r = mulberry32(xmur3("cah|" + seed)()), idx = NAMES.map((_, i) => i), out = [];
+  for(let i = 0; i < SLOTS.length; i++){ const j = i + Math.floor(r() * (idx.length - i)); [idx[i], idx[j]] = [idx[j], idx[i]]; out.push(idx[i]); }
+  return out;                                          // indices into NAMES, in draw order
+}
+
+/* Dates and puzzle numbers (local midnight, like the other games) */
+const pad = n => String(n).padStart(2, "0");
+const localISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const dayNo = iso => { const [y,m,d] = iso.split("-").map(Number), [ly,lm,ld] = D.launch.split("-").map(Number);
+  return Math.round((Date.UTC(y, m - 1, d) - Date.UTC(ly, lm - 1, ld)) / 864e5) + 1; };
+
+/* Game state: the seed, whether the title card was clicked (s), and the slot each drawn wrestler went into (w).
+   Everything else is replayed from those. */
+let S = null, fresh = null;
+const valid = g => g && g.v === SAVE_V && Array.isArray(g.w) && typeof g.seed === "string";
+function load(mode){
+  if(mode === "daily"){
+    const today = localISO(new Date()), saved = store.get("cah-daily");
+    S = valid(saved) && saved.seed === today ? saved : {v: SAVE_V, seed: today, s: 0, w: []};
+  } else {
+    const saved = store.get("cah-free");
+    S = valid(saved) ? saved : newFree(0);
+  }
+  S.mode = mode; S.draws = draw(S.seed); fresh = null;
+  store.set("cah-mode", mode);
+}
+const newFree = started => ({v: SAVE_V, seed: "free-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8), s: started, w: []});
+function save(){ const {draws: _, mode, ...keep} = S; store.set(mode === "daily" ? "cah-daily" : "cah-free", keep); }
+
+const done = () => S.w.length >= SLOTS.length;
+const whoIn = id => { const k = S.w.indexOf(id); return k < 0 ? null : S.draws[k]; };   // index into NAMES
+const rating = (who, id) => RAT[who][SLOT[id].i];
+const total = assign => SLOTS.reduce((a, s) => a + rating(assign[s.id], s.id), 0);
+const mine = () => Object.fromEntries(SLOTS.map(s => [s.id, whoIn(s.id)]));
+
+// Best possible Hoss from the same five draws (120 ways to place them; check them all)
+function perfectHoss(){
+  let best = null, bestT = -1;
+  const ids = SLOTS.map(s => s.id);
+  (function perm(k, used, assign){
+    if(k === S.draws.length){ const t = total(assign); if(t > bestT){ bestT = t; best = {...assign}; } return; }
+    ids.forEach(id => { if(!used.has(id)){ used.add(id); assign[id] = S.draws[k]; perm(k + 1, used, assign); used.delete(id); } });
+  })(0, new Set(), {});
+  return {assign: best, total: bestT, ovr: ovrOf(bestT)};
+}
+
+function start(){ if(S.s) return; S.s = 1; fresh = "draw"; save(); render(); }
+function place(id){
+  if(!S.s || done() || S.w.includes(id)) return;
+  S.w.push(id); fresh = id; save(); render();
+  if(done()){
+    hossDone();
+    const k = winKind();                                  // a Perfect Hoss gets confetti; a 99 gets double
+    if(k){ window.scrollTo({top: 0, behavior: "smooth"}); confetti(k === "goat" ? 2 : 1); }
+  }
+}
+/* "goat" = 99 OVR (THE GREATEST HOSS OF ALL TIME). "perfect" = the best total these five could make, short of 99. "" = neither. */
+function winKind(){
+  const t = total(mine());
+  return ovrOf(t) === 99 ? "goat" : t >= perfectHoss().total ? "perfect" : "";
+}
+// Stats, saved for the shared Stats page later (cah-stats). Each finished Hoss counts once, by mode + seed.
+function hossDone(){
+  const o = ovrOf(total(mine())), key = S.mode + ":" + S.seed;
+  const st = Object.assign({played: 0, hosses: 0, streak: 0, best: 0, lastDone: 0, ovr: {}, seen: []}, store.get("cah-stats") || {});
+  if(st.seen.includes(key)) return;
+  st.seen = [...st.seen.slice(-60), key];
+  st.hosses++; st.top = Math.max(st.top || 0, o); st.ovr[o] = (st.ovr[o] || 0) + 1;
+  if(S.mode === "daily"){ const n = dayNo(S.seed); st.played++; st.streak = st.lastDone === n - 1 ? st.streak + 1 : 1; st.best = Math.max(st.best, st.streak); st.lastDone = n; }
+  store.set("cah-stats", st);
+  if(!window.HOSS) return;                                // the Claude preview has no site layer
+  const earn = id => HOSS.earn("cah", id), parts = SLOTS.map(sl => rating(mine()[sl.id], sl.id)), k = winKind();
+  earn("first");
+  if(k) earn("perfect");
+  if(o >= 90) earn("great");
+  if(o === 99) earn("goat");
+  if(parts.every(r => r >= 3)) earn("noweak");
+  if(o <= 60) earn("awful");
+  if(S.mode === "daily"){ if(st.streak >= 3) earn("three"); if(st.streak >= 7) earn("iron"); }
+  if(st.hosses >= 25) earn("vet");
+}
+
+/* Rendering */
+/* Ratings are never shown as numbers (Pete, Nov 10: no 1-5 scale for people to argue over). A finished Hoss colors each name
+   instead: 5 green, 3-4 yellow, 2 orange, 1 red. The word is only for screen readers. Share text uses the matching squares. */
+const GRADE = r => r >= 5 ? {c: "g", sq: "🟩", w: "top marks"} : r >= 3 ? {c: "y", sq: "🟨", w: "solid"} : r === 2 ? {c: "o", sq: "🟧", w: "weak"} : {c: "r", sq: "🟥", w: "awful"};
+const nameHTML = (who, id) => { const g = GRADE(rating(who, id)); return `<span class="hl ${g.c}">${esc(NAMES[who])}<span class="sr"> (${g.w})</span></span>`; };
+function tagHTML(s, over, live, best){
+  const who = whoIn(s.id);
+  if(who === null){
+    if(live) return `<button type="button" class="tag" data-slot="${s.id}"><span class="k">${s.name}</span><span class="who none">Put them here</span></button>`;
+    return `<div class="tag" data-slot="${s.id}"><span class="k">${s.name}</span><span class="who none">Open</span></div>`;
+  }
+  return `<div class="tag${fresh === s.id ? " fresh" : ""}${best ? " best" : ""}" data-slot="${s.id}">
+    <span class="k">${s.name}</span><span class="who">${over ? nameHTML(who, s.id) : esc(NAMES[who])}</span>
+    ${over && s.id === "fin" ? `<span class="move">${esc(MOVE[who])}</span>` : ""}</div>`;
+}
+function render(){
+  const plate = $("#plate"), over = done(), title = !S.s, live = S.s && !over;
+  $("#modeDaily").setAttribute("aria-pressed", S.mode === "daily");
+  $("#modeFree").setAttribute("aria-pressed", S.mode === "free");
+  $("#metaL").textContent = S.mode === "daily" ? `Daily #${dayNo(S.seed)}` : "Free play";
+  $("#metaR").textContent = S.mode === "daily" ? new Date().toLocaleDateString(undefined, {weekday: "short", month: "short", day: "numeric"}) : "";
+  plate.classList.toggle("tap", title); plate.classList.toggle("title", title);
+  plate.classList.toggle("win", over && !!winKind());
+  if(title){ plate.setAttribute("role", "button"); plate.tabIndex = 0; } else { plate.removeAttribute("role"); plate.removeAttribute("tabindex"); }
+  if(title){
+    $("#drawEyebrow").textContent = S.mode === "daily" ? `Daily #${dayNo(S.seed)}` : "Free play";
+    $("#drawName").textContent = "Create-A-Hoss";
+    $("#drawSub").textContent = "Click to begin";
+    $("#hint").textContent = "";
+  } else if(!over){
+    $("#drawEyebrow").textContent = `Wrestler ${S.w.length + 1} of ${SLOTS.length}`;
+    $("#drawName").textContent = NAMES[S.draws[S.w.length]];
+    $("#drawSub").textContent = " ";
+    $("#hint").textContent = "Click a label to give your Hoss this part of them. No take-backs.";
+  } else {
+    const o = ovrOf(total(mine())), k = winKind();
+    $("#drawEyebrow").textContent = S.mode === "daily" ? `Create-A-Hoss #${dayNo(S.seed)}` : "Free play";
+    if(k === "goat"){
+      $("#drawName").innerHTML = `<span class="goat">The Greatest Hoss of All Time</span>`;
+      $("#drawSub").textContent = "99 OVR";
+    } else if(k === "perfect"){
+      $("#drawName").textContent = "Perfect Hoss";
+      $("#drawSub").textContent = `${o} OVR. You scored the perfect score with these options.`;
+    } else {
+      $("#drawName").innerHTML = `<span class="ovr"><b>${o}</b><small>OVR</small></span>`;
+      $("#drawSub").textContent = verdictOf(o);
+    }
+    $("#hint").textContent = "";
+  }
+  if(fresh){ plate.classList.remove("glint"); void plate.offsetWidth; plate.classList.add("glint"); }
+  const showBest = over && S.pf ? perfectHoss().assign : null;
+  for(const side of ["l", "r"]) $("#col" + side.toUpperCase()).innerHTML =
+    SLOTS.filter(s => s.side === side).map(s => tagHTML(s, over, live, showBest && showBest[s.id] === whoIn(s.id))).join("");
+  $("#done").hidden = !over;
+  if(over){
+    $("#share").textContent = shareFull();
+    $("#doneTitle").textContent = S.mode === "daily" ? "Today's Hoss" : "Your Hoss";
+    $("#againBtn").textContent = S.mode === "daily" ? "Free play" : "Build another";
+    renderPerfect();
+  }
+  $("#status").textContent = over && S.mode === "daily" ? nextLine() : "";
+  $("#foot").textContent = `${NAMES.length} wrestlers in the pool. A new daily Hoss at midnight your time.`;
+  wires();
+}
+function renderPerfect(){
+  $("#perfectBtn").hidden = !!S.pf; $("#perfect").hidden = !S.pf;
+  if(!S.pf) return;
+  const p = perfectHoss(), mineT = total(mine());
+  $("#perfect").innerHTML = `<h3>Perfect Hoss: ${p.ovr} OVR</h3>
+    <ul>${ORDER.map(id => `<li><span>${SLOT[id].name}</span><span class="pw">${nameHTML(p.assign[id], id)}</span></li>`).join("")}</ul>
+    <p>${mineT >= p.total ? "You built the best Hoss these five could make." : `Yours: ${ovrOf(mineT)} OVR. The best these five could make is ${p.ovr}.`}</p>`;
+}
+
+/* Confetti for a Perfect Hoss (level 1) or a 99 (level 2: twice the pieces, cannons from both bottom corners, and a second
+   wave). A canvas over the whole page that never takes taps and removes itself when the last piece is gone.
+   Skipped for people who ask for reduced motion. */
+function confetti(level){
+  if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cv = document.createElement("canvas"), ctx = cv.getContext("2d"), dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.style.cssText = "position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:2147483000";
+  const fit = () => { cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; };
+  fit(); window.addEventListener("resize", fit);
+  document.documentElement.appendChild(cv);
+  const COLORS = ["#5B18EA", "#8F5CFF", "#C3C7CD", "#F4F5F7", "#F2D04B", "#5CCB7E", "#0E0F12"];
+  const P = [], W = () => innerWidth, H = () => innerHeight, rnd = (a, b) => a + Math.random() * (b - a);
+  const piece = (x, y, vx, vy) => P.push({x, y, vx, vy, w: rnd(6, 11), h: rnd(9, 16), r: rnd(0, 6.3), vr: rnd(-.25, .25),
+    s: rnd(0, 6.3), c: COLORS[Math.floor(Math.random() * COLORS.length)]});
+  const rain = n => { for(let i = 0; i < n; i++) piece(rnd(0, W()), rnd(-H() * .5, -10), rnd(-1.5, 1.5), rnd(1, 4)); };
+  const cannons = n => { for(let i = 0; i < n; i++){ const left = i % 2 === 0;
+    piece(left ? -10 : W() + 10, H() * rnd(.75, 1), (left ? 1 : -1) * rnd(4, 11), -rnd(10, 19)); } };
+  rain(130 * level);
+  if(level > 1){ cannons(160); setTimeout(() => { rain(160); cannons(120); }, 900); }
+  let last = performance.now(), born = last;
+  (function frame(now){
+    const dt = Math.min(2.5, (now - last) / 16.7); last = now;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W(), H());
+    for(const p of P){
+      p.vy = Math.min(p.vy + .32 * dt, 6); p.vx *= Math.pow(.985, dt); p.s += .08 * dt;
+      p.x += (p.vx + Math.sin(p.s) * .8) * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.scale(1, Math.cos(p.s * 1.7));
+      ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+    }
+    for(let i = P.length - 1; i >= 0; i--) if(P[i].y > H() + 30) P.splice(i, 1);
+    if((P.length || now - born < 1200) && now - born < 9000) requestAnimationFrame(frame);
+    else { window.removeEventListener("resize", fit); cv.remove(); }
+  })(last);
+}
+
+/* Leader lines: from the inner edge of each label to its body point on the figure */
+function wires(){
+  const svg = $("#wires"), stage = $("#stage").getBoundingClientRect(), fig = $("#fig").getBoundingClientRect();
+  if(!fig.width) return;
+  svg.setAttribute("viewBox", `0 0 ${stage.width} ${stage.height}`);
+  svg.innerHTML = SLOTS.map(s => {
+    const el = document.querySelector(`.tag[data-slot="${s.id}"]`); if(!el) return "";
+    const b = el.getBoundingClientRect(), left = s.side === "l";
+    const x1 = (left ? b.right : b.left) - stage.left, y1 = b.top + Math.min(22, b.height / 2) - stage.top;
+    const x2 = fig.left - stage.left + s.at[0] * fig.width, y2 = fig.top - stage.top + s.at[1] * fig.height;
+    const xm = x1 + (left ? 8 : -8);
+    return `<g class="${el.tagName === "BUTTON" ? "live" : ""}"><path d="M${x1} ${y1}H${xm}L${x2} ${y2}"/><circle cx="${x2}" cy="${y2}" r="4.5"/></g>`;
+  }).join("");
+}
+
+/* Share text. Short = OVR and a colored square per slot, no names (no spoilers for the daily). Full = names and the finisher too. */
+const head = () => S.mode === "daily" ? `Create-A-Hoss #${dayNo(S.seed)}` : "Create-A-Hoss free play";
+function resultLine(){
+  const o = ovrOf(total(mine())), k = winKind();
+  return k === "goat" ? "My Hoss: 99 OVR. THE GREATEST HOSS OF ALL TIME" : k === "perfect" ? `My Hoss: ${o} OVR. Perfect Hoss!` : `My Hoss: ${o} OVR (${verdictOf(o)})`;
+}
+function shareShort(){
+  const a = mine();
+  return [head(), resultLine(), ...ORDER.map(id => `${GRADE(rating(a[id], id)).sq} ${SLOT[id].name}`),
+    ...(D.site ? ["", D.site] : [])].join("\n");
+}
+function shareFull(){
+  const a = mine();
+  return [head(), resultLine(), "",
+    ...ORDER.map(id => `${GRADE(rating(a[id], id)).sq} ${SLOT[id].name}: ${NAMES[a[id]]}${id === "fin" ? ` (${MOVE[a[id]]})` : ""}`),
+    ...(D.site ? ["", D.site] : [])].join("\n");
+}
+function nextLine(){
+  const now = new Date(), t = new Date(now); t.setHours(24, 0, 0, 0);
+  const mins = Math.max(1, Math.round((t - now) / 6e4));
+  return `New Hoss in ${Math.floor(mins / 60)}h ${mins % 60}m.`;
+}
+function copy(text){
+  const ok = () => { $("#status").textContent = "Copied. Go start an argument."; };
+  const fallback = () => { const box = $("#copyBox"); box.value = text; box.select();
+    try{ document.execCommand("copy"); ok(); }catch(e){ $("#status").textContent = "Couldn't copy. Select the text and copy it yourself."; } };
+  if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fallback); else fallback();
+}
+
+/* Wiring */
+$("#stage").addEventListener("click", e => { const b = e.target.closest("button[data-slot]"); if(b) place(b.dataset.slot); });
+$("#plate").addEventListener("click", () => { if($("#plate").classList.contains("tap")) start(); });
+$("#plate").addEventListener("keydown", e => {
+  if($("#plate").classList.contains("tap") && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); start(); } });
+$("#modeDaily").addEventListener("click", () => { load("daily"); render(); });
+$("#modeFree").addEventListener("click", () => { load("free"); render(); });
+$("#againBtn").addEventListener("click", () => {
+  if(S.mode === "free") store.set("cah-free", newFree(1));       // straight to the first draw, no title card
+  load("free"); render(); window.scrollTo({top: 0, behavior: "smooth"});
+});
+$("#copyShort").addEventListener("click", () => copy(shareShort()));
+$("#copyFull").addEventListener("click", () => copy(shareFull()));
+$("#perfectBtn").addEventListener("click", () => { S.pf = 1; save(); render(); });
+$("#fig").addEventListener("load", wires);
+window.addEventListener("resize", wires);
+if(window.ResizeObserver) new ResizeObserver(wires).observe($("#stage"));
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(wires);
+setInterval(() => { if(S && S.mode === "daily" && done()) $("#status").textContent = nextLine(); }, 60000);
+
+load(store.get("cah-mode") === "free" ? "free" : "daily");
+render();
+
+</script>
+</body>
+</html>
